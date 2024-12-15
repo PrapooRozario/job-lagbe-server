@@ -25,6 +25,9 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     const jobsCollection = client.db("JobLagbeDB").collection("Jobs");
+    const applicationCollection = client
+      .db("JobLagbeDB")
+      .collection("Applications");
 
     app.get("/jobs", async (req, res) => {
       const jobs = await jobsCollection.find().toArray();
@@ -35,6 +38,12 @@ async function run() {
       const { id } = req.params;
       const job = await jobsCollection.findOne({ _id: new ObjectId(id) });
       res.send(job);
+    });
+
+    app.post("/applications", async (req, res) => {
+      const application = req.body;
+      const result = await applicationCollection.insertOne(application);
+      res.send(result);
     });
 
     console.log(
