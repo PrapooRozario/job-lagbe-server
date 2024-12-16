@@ -34,6 +34,26 @@ async function run() {
       res.send(jobs);
     });
 
+    app.get("/jobs/application/:email", async (req, res) => {
+      const email = req.params.email;
+      const applications = await applicationCollection
+        .find({
+          applicant_email: email,
+        })
+        .toArray();
+
+      for (const application of applications) {
+        const job = await jobsCollection.findOne({
+          _id: new ObjectId(application.job_id),
+        });
+        application.title = job.title;
+        application.company = job.company;
+        application.location = job.location;
+      }
+
+      res.send(applications);
+    });
+
     app.get("/jobs/:id", async (req, res) => {
       const { id } = req.params;
       const job = await jobsCollection.findOne({ _id: new ObjectId(id) });
@@ -46,6 +66,13 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/applications", async (req, res) => {
+      const email = req.query.email;
+      const result = await applicationCollection
+        .find({ applicant_email: email })
+        .toArray();
+      res.send(result);
+    });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
